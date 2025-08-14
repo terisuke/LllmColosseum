@@ -1,6 +1,6 @@
-# Local LLM Arena
+# LLLM Colosseum (Local Large Language Model Colosseum)
 
-M4 MacBook Pro（128GB）向けに最適化されたローカルLLMディベートシステム
+最先端のローカルLLMバトルアリーナ - M4 MacBook Pro最適化版
 
 ## 🎯 概要
 

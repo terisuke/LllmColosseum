@@ -12,7 +12,7 @@ from debate_manager import (
     DebateMetrics, DebateTurn
 )
 
-app = FastAPI(title="Local LLM Arena API", version="1.0.0")
+app = FastAPI(title="LLLM Colosseum API", version="1.0.0")
 
 # CORS設定
 app.add_middleware(

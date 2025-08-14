@@ -127,3 +127,6 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+# Project specific ignores
+.mcp.json
+.serena/
