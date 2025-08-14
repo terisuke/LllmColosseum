@@ -7,6 +7,7 @@ interface ArenaStore extends ArenaState {
   setConnectionError: (error: string | null) => void;
   setAvailableModels: (models: ModelInfo[]) => void;
   selectModel: (role: 'combatant_a' | 'combatant_b' | 'judge', modelId: string) => void;
+  setSelectedModels: (models: { combatant_a: string; combatant_b: string; judge: string }) => void;
   setDebateTopic: (topic: string) => void;
   startDebate: () => void;
   endDebate: () => void;
@@ -58,6 +59,8 @@ export const useArenaStore = create<ArenaStore>((set) => ({
       [role]: modelId
     }
   })),
+  
+  setSelectedModels: (models) => set({ selectedModels: models }),
   
   setDebateTopic: (topic) => set({ debateTopic: topic }),
   

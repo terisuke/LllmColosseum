@@ -32,7 +32,7 @@ class DebateTurn:
 
 
 class DebateAgent:
-    def __init__(self, name: str, model_id: str, endpoint: str = "http://localhost:11434/v1/chat/completions", 
+    def __init__(self, name: str, model_id: str, endpoint: str = "http://localhost:11434/api/chat", 
                  api_key: Optional[str] = None, persona: Optional[str] = None):
         self.name = name
         self.model_id = model_id
@@ -84,24 +84,26 @@ Make your response in 2-3 paragraphs."""
                 "model": self.model_id,
                 "messages": messages,
                 "stream": True,
-                "temperature": 0.7,
-                "max_tokens": 500
+                "options": {
+                    "temperature": 0.7,
+                    "num_predict": 500
+                }
             }
         ) as response:
             full_content = ""
             async for line in response.content:
                 if line:
                     line_str = line.decode('utf-8').strip()
-                    if line_str.startswith("data: "):
-                        data_str = line_str[6:]
-                        if data_str == "[DONE]":
-                            break
-                        try:
-                            data = json.loads(data_str)
-                            if 'choices' in data and data['choices']:
-                                delta = data['choices'][0].get('delta', {})
-                                if 'content' in delta:
-                                    token = delta['content']
+                    # Ollama streams JSON directly without "data: " prefix
+                    try:
+                        data = json.loads(line_str)
+                        # Ollama API format - each message contains a single token
+                        if 'message' in data and not data.get('done', False):
+                            message = data['message']
+                            if 'content' in message:
+                                token = message['content']
+                                
+                                if token:
                                     if first_token:
                                         metrics.ttft = time.perf_counter() - metrics.start_time
                                         first_token = False
@@ -114,8 +116,8 @@ Make your response in 2-3 paragraphs."""
                                         metrics.tps = metrics.total_tokens / elapsed
                                     
                                     yield token, metrics
-                        except json.JSONDecodeError:
-                            continue
+                    except json.JSONDecodeError:
+                        continue
             
             metrics.end_time = time.perf_counter()
             self.conversation_history.append({"role": "user", "content": prompt})
@@ -123,7 +125,7 @@ Make your response in 2-3 paragraphs."""
 
 
 class JudgeAgent:
-    def __init__(self, name: str, model_id: str, endpoint: str = "http://localhost:11434/v1/chat/completions",
+    def __init__(self, name: str, model_id: str, endpoint: str = "http://localhost:11434/api/chat",
                  api_key: Optional[str] = None):
         self.name = name
         self.model_id = model_id
@@ -173,24 +175,26 @@ Format your response with clear sections and provide detailed reasoning for your
                 "model": self.model_id,
                 "messages": [{"role": "user", "content": evaluation_prompt}],
                 "stream": True,
-                "temperature": 0.3,
-                "max_tokens": 1000
+                "options": {
+                    "temperature": 0.3,
+                    "num_predict": 1000
+                }
             }
         ) as response:
             full_content = ""
             async for line in response.content:
                 if line:
                     line_str = line.decode('utf-8').strip()
-                    if line_str.startswith("data: "):
-                        data_str = line_str[6:]
-                        if data_str == "[DONE]":
-                            break
-                        try:
-                            data = json.loads(data_str)
-                            if 'choices' in data and data['choices']:
-                                delta = data['choices'][0].get('delta', {})
-                                if 'content' in delta:
-                                    token = delta['content']
+                    # Ollama streams JSON directly without "data: " prefix
+                    try:
+                        data = json.loads(line_str)
+                        # Ollama API format - each message contains a single token
+                        if 'message' in data and not data.get('done', False):
+                            message = data['message']
+                            if 'content' in message:
+                                token = message['content']
+                                
+                                if token:
                                     if first_token:
                                         metrics.ttft = time.perf_counter() - metrics.start_time
                                         first_token = False
@@ -203,8 +207,8 @@ Format your response with clear sections and provide detailed reasoning for your
                                         metrics.tps = metrics.total_tokens / elapsed
                                     
                                     yield token, metrics
-                        except json.JSONDecodeError:
-                            continue
+                    except json.JSONDecodeError:
+                        continue
             
             metrics.end_time = time.perf_counter()
             

@@ -14,7 +14,7 @@ interface ControlPanelProps {
 }
 
 export const ControlPanel = ({ onStartDebate }: ControlPanelProps) => {
-  const { isConnected, isDebating, setDebateTopic, setSelectedModels } = useArenaStore();
+  const { isConnected, isDebateActive, setDebateTopic, setSelectedModels } = useArenaStore();
   const [topic, setTopic] = useState('');
   const [combatantA, setCombatantA] = useState('');
   const [combatantB, setCombatantB] = useState('');
@@ -80,7 +80,7 @@ export const ControlPanel = ({ onStartDebate }: ControlPanelProps) => {
     });
   };
 
-  const isFormValid = topic.trim() && combatantA && combatantB && judge && isConnected && !isDebating;
+  const isFormValid = topic.trim() && combatantA && combatantB && judge && isConnected && !isDebateActive;
 
   return (
     <div className="bg-gray-900 rounded-lg p-6 space-y-4">
@@ -105,7 +105,7 @@ export const ControlPanel = ({ onStartDebate }: ControlPanelProps) => {
           onChange={(e) => setTopic(e.target.value)}
           placeholder="Enter a topic for debate..."
           className="w-full px-3 py-2 bg-gray-800 text-white rounded-md border border-gray-700 focus:border-blue-500 focus:outline-none"
-          disabled={isDebating}
+          disabled={isDebateActive}
         />
       </div>
 
@@ -135,7 +135,7 @@ export const ControlPanel = ({ onStartDebate }: ControlPanelProps) => {
             value={combatantA}
             onChange={(e) => setCombatantA(e.target.value)}
             className="w-full px-3 py-2 bg-gray-800 text-white rounded-md border border-gray-700 focus:border-blue-500 focus:outline-none"
-            disabled={isDebating || isLoadingModels}
+            disabled={isDebateActive || isLoadingModels}
           >
             <option value="">Select Model...</option>
             {availableModels.map((model) => {
@@ -157,7 +157,7 @@ export const ControlPanel = ({ onStartDebate }: ControlPanelProps) => {
             value={combatantB}
             onChange={(e) => setCombatantB(e.target.value)}
             className="w-full px-3 py-2 bg-gray-800 text-white rounded-md border border-gray-700 focus:border-blue-500 focus:outline-none"
-            disabled={isDebating || isLoadingModels}
+            disabled={isDebateActive || isLoadingModels}
           >
             <option value="">Select Model...</option>
             {availableModels.map((model) => {
@@ -179,7 +179,7 @@ export const ControlPanel = ({ onStartDebate }: ControlPanelProps) => {
             value={judge}
             onChange={(e) => setJudge(e.target.value)}
             className="w-full px-3 py-2 bg-gray-800 text-white rounded-md border border-gray-700 focus:border-blue-500 focus:outline-none"
-            disabled={isDebating || isLoadingModels}
+            disabled={isDebateActive || isLoadingModels}
           >
             <option value="">Select Model...</option>
             {availableModels.map((model) => {
@@ -214,7 +214,7 @@ export const ControlPanel = ({ onStartDebate }: ControlPanelProps) => {
             : 'bg-gray-700 text-gray-400 cursor-not-allowed'
         }`}
       >
-        {isDebating ? (
+        {isDebateActive ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
             <span>Debate in Progress...</span>
