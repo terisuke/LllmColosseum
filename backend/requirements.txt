@@ -1,0 +1,21 @@
+# Core dependencies
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+websockets==13.1
+python-multipart==0.0.12
+
+# Async HTTP
+aiohttp==3.11.10
+httpx
+
+# Ollama integration
+ollama==0.4.5
+
+# Data processing
+pyyaml==6.0.2
+pydantic==2.10.4
+datasets==3.2.0
+
+# Utils
+python-dotenv==1.0.1
+typing-extensions==4.12.2
