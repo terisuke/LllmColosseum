@@ -152,6 +152,20 @@ ollama pull llama3.2:1b
 ollama pull gemma2:2b
 ```
 
+## 🌟 Features
+
+- ⚡ Real-time token streaming with WebSocket
+- 🎯 ELO rating system for model comparison
+- 🔒 100% local & private execution
+- 🚀 Optimized for Apple Silicon (M4 Mac)
+- 🎨 Modern UI with Next.js 15 & Tailwind CSS
+- 📊 Performance metrics (TPS, TTFT, time tracking)
+- 🤖 Support for multiple Ollama models
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
 ## 📄 ライセンス
 
 MIT License - 詳細は[LICENSE](LICENSE)を参照
