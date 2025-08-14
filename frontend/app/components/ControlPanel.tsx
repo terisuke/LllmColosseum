@@ -18,7 +18,7 @@ export const ControlPanel = ({ onStartDebate, isConnected, isDebating }: Control
   const [combatantA, setCombatantA] = useState('');
   const [combatantB, setCombatantB] = useState('');
   const [judge, setJudge] = useState('');
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
 
   const fetchModels = async () => {
@@ -27,17 +27,23 @@ export const ControlPanel = ({ onStartDebate, isConnected, isDebating }: Control
       const response = await fetch('http://localhost:8000/api/models');
       if (response.ok) {
         const data = await response.json();
-        setAvailableModels(data.models || []);
+        // Handle both array and object with models property
+        const modelsList = Array.isArray(data) ? data : (data.models || []);
+        setAvailableModels(modelsList);
         
         // Set default models if available
-        if (data.models.length > 0) {
-          setCombatantA(data.models[0]);
-          setCombatantB(data.models[Math.min(1, data.models.length - 1)]);
-          setJudge(data.models[Math.min(2, data.models.length - 1)]);
+        if (modelsList.length > 0) {
+          const modelIds = modelsList.map((m: any) => 
+            typeof m === 'string' ? m : m.model_id || m.name
+          );
+          setCombatantA(modelIds[0]);
+          setCombatantB(modelIds[Math.min(1, modelIds.length - 1)]);
+          setJudge(modelIds[Math.min(2, modelIds.length - 1)]);
         }
       }
     } catch (error) {
       console.error('Failed to fetch models:', error);
+      setAvailableModels([]);
     } finally {
       setIsLoadingModels(false);
     }
@@ -123,11 +129,15 @@ export const ControlPanel = ({ onStartDebate, isConnected, isDebating }: Control
             disabled={isDebating || isLoadingModels}
           >
             <option value="">Select Model...</option>
-            {availableModels.map((model) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
+            {availableModels.map((model) => {
+              const modelId = typeof model === 'string' ? model : model.model_id || model.name;
+              const modelName = typeof model === 'string' ? model : model.name || model.model_id;
+              return (
+                <option key={modelId} value={modelId}>
+                  {modelName}
+                </option>
+              );
+            })}
           </select>
         </div>
 
@@ -141,11 +151,15 @@ export const ControlPanel = ({ onStartDebate, isConnected, isDebating }: Control
             disabled={isDebating || isLoadingModels}
           >
             <option value="">Select Model...</option>
-            {availableModels.map((model) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
+            {availableModels.map((model) => {
+              const modelId = typeof model === 'string' ? model : model.model_id || model.name;
+              const modelName = typeof model === 'string' ? model : model.name || model.model_id;
+              return (
+                <option key={modelId} value={modelId}>
+                  {modelName}
+                </option>
+              );
+            })}
           </select>
         </div>
 
@@ -159,11 +173,15 @@ export const ControlPanel = ({ onStartDebate, isConnected, isDebating }: Control
             disabled={isDebating || isLoadingModels}
           >
             <option value="">Select Model...</option>
-            {availableModels.map((model) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
+            {availableModels.map((model) => {
+              const modelId = typeof model === 'string' ? model : model.model_id || model.name;
+              const modelName = typeof model === 'string' ? model : model.name || model.model_id;
+              return (
+                <option key={modelId} value={modelId}>
+                  {modelName}
+                </option>
+              );
+            })}
           </select>
         </div>
       </div>

@@ -101,8 +101,9 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
       };
 
       ws.onerror = (event) => {
-        console.error('WebSocket error:', event);
-        setError('WebSocket connection error');
+        console.error('WebSocket error occurred');
+        const errorMsg = `WebSocket connection failed. Please ensure the backend is running on ${url}`;
+        setError(errorMsg);
         setIsConnecting(false);
         onError?.(event);
       };
