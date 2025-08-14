@@ -1,110 +1,168 @@
-# OpenArena: Competitive Dataset Generation
+# Local LLM Arena
 
-![Llamas fighting in an arena](assets/fight.jpeg)
+M4 MacBook Pro（128GB）向けに最適化されたローカルLLMディベートシステム
 
-## Overview
+## 🎯 概要
 
-OpenArena is a Python project designed to create high-quality datasets by pitting Language Models (LLMs) against each other in a competitive environment. This tool uses an ELO-based rating system to rank different LLMs based on their performance on various prompts, judged by another LLM acting as an impartial evaluator.
+複数のLLMモデルがリアルタイムでディベートを行い、その能力を視覚的に比較できるプラットフォーム。
+完全にローカル環境で動作し、プライバシーとパフォーマンスを両立。
 
-## Features
+## 🙏 Credits
 
-- Asynchronous battles between multiple LLMs
-- ELO rating system for model performance tracking
-- Detailed evaluation and scoring by a judge model
-- Generation of training data based on model performances
-- Support for Hugging Face datasets
-- YAML configuration for easy setup and customization
-- Support for custom endpoints and API keys
+本プロジェクトは [syv-ai/OpenArena](https://github.com/syv-ai/OpenArena) のコアロジックを基に構築されています。
 
-## Requirements
+### OpenArenaから活用している機能：
+- ELOレーティングシステム
+- ディベートオーケストレーション
+- 非同期LLM処理ロジック
 
-- Python 3.7+
-- Ollama (for local model execution)
+### 本プロジェクトの独自拡張：
+- Next.js/React によるリアルタイムUI
+- WebSocketストリーミング
+- 3カラムディベート可視化
+- M4 Mac向けメモリ最適化
 
-## Installation
+## 🚀 クイックスタート
 
-1. Clone this repository:
-   ```
-   git clone https://github.com/syv-ai/OpenArena.git
-   cd OpenArena
-   ```
+```bash
+# 開発環境の起動
+chmod +x run_dev.sh
+./run_dev.sh
+```
 
-2. Install the required packages:
-   ```
-   pip install -r requirements.txt
-   ```
+アプリケーションが起動すると：
+- Frontend UI: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
 
-3. Ensure you have access to the Ollama API endpoint (default: `http://localhost:11434/v1/chat/completions`) or other custom endpoints as specified in your configuration.
+## 📋 必要要件
 
-## Usage
+- macOS (M4 MacBook Pro推奨)
+- Ollama インストール済み
+- Python 3.10+
+- Node.js 18+
+- 128GB RAM (3モデル同時実行時推奨)
 
-1. Create or modify the `arena_config.yaml` file to set up your desired models, datasets, and endpoints:
-   ```yaml
-   default_endpoint:
-     url: "http://localhost:11434/v1/chat/completions"
-     # api_key: "your_default_api_key"  # Uncomment and set if needed
+### Ollamaのインストール
 
-   judge_model:
-     name: "JudgeModel"
-     model_id: "llama3"
-     # endpoint:
-     #   url: "http://custom-judge-endpoint.com/api/chat"
-     #   api_key: "judge_model_api_key"
+```bash
+# Ollamaをインストール
+curl -fsSL https://ollama.com/install.sh | sh
 
-   models:
-     - name: "Open hermes"
-       model_id: "openhermes"
-       # endpoint:
-       #   url: "http://custom-phi3-endpoint.com/api/chat"
-       #   api_key: "phi3_api_key"
-     - name: "Mistral v0.3"
-       model_id: "mistral"
-     - name: "Phi 3 medium"
-       model_id: "phi3:14b"
+# Ollamaを起動
+ollama serve
+```
 
-   datasets:
-     - name: "skunkworksAI/reasoning-0.01"
-       description: "Reasoning dataset"
-       split: "train"
-       field: "instruction"
-       limit: 10
-   ```
+### 推奨モデル
 
-2. Run the script:
-   ```
-   python llm_arena.py
-   ```
+開発・テスト用（軽量）：
+```bash
+ollama pull llama3.2:3b
+ollama pull gemma2:2b
+ollama pull qwen2.5:3b
+```
 
-3. The script will output:
-   - Intermediate ELO rankings after each prompt
-   - ELO rating progression for each model
-   - Generated training data
-   - Final ELO ratings
-   - Total execution time
+本番用（高性能）：
+```bash
+ollama pull qwen2.5:32b
+ollama pull llama3.1:70b
+ollama pull gemma-3:27b
+```
 
-## How it Works
+## 🏗️ アーキテクチャ
 
-1. **Configuration Loading**: The script loads the configuration from the `arena_config.yaml` file.
-2. **Dataset Loading**: Prompts are loaded from the specified Hugging Face dataset(s).
-3. **Response Generation**: Each model generates responses for all given prompts.
-4. **Evaluation**: The judge model evaluates pairs of responses for each prompt, providing scores and explanations.
-5. **ELO Updates**: ELO ratings are updated based on the scores from each battle.
-6. **Training Data Generation**: The results are compiled into a structured format for potential use in training or fine-tuning other models.
+```
+local-llm-arena/
+├── backend/           # FastAPI バックエンド
+│   ├── main.py       # WebSocketエンドポイント
+│   ├── debate_manager.py  # ディベート制御ロジック
+│   └── requirements.txt
+├── frontend/         # Next.js フロントエンド
+│   ├── app/
+│   │   ├── components/    # UIコンポーネント
+│   │   ├── hooks/        # カスタムフック
+│   │   └── page.tsx      # メインページ
+│   └── package.json
+└── run_dev.sh       # 開発環境起動スクリプト
+```
 
-## Customization
+### 技術スタック
 
-- Modify the `arena_config.yaml` file to add or remove models, change the judge model, adjust dataset parameters, or specify custom endpoints and API keys.
-- Adjust the ELO K-factor in the `update_elo_ratings()` method to change the volatility of the ratings.
+- **Backend**: FastAPI + WebSocket
+- **Frontend**: Next.js 15 + React 19 + Tailwind CSS
+- **LLM Engine**: Ollama
+- **State Management**: Zustand
+- **WebSocket**: react-use-websocket
 
-## Future work
+## 📦 開発セットアップ
 
-- [ ] Automatically download Ollama models
-- [X] Added YAML configuration
-- [X] OpenAI support - supports any OpenAI compatible endpoint (also vLLM)
-- [X] Hugging Face datasets integration
-- [ ] Auto upload to Hugging Face
-- [ ] Database to keep track of which prompts have been done if it should fail
+### Backend
 
-## Contributing
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## 🎮 使い方
+
+1. **モデル選択**: Control Panelから3つのモデルを選択
+   - Combatant A: 賛成側の論者
+   - Combatant B: 反対側の論者
+   - Judge: 審判役
+
+2. **トピック入力**: ディベートのテーマを入力
+
+3. **ディベート開始**: "Start Debate"ボタンをクリック
+
+4. **リアルタイム観戦**: 3カラムレイアウトでトークンストリーミングを観察
+
+## ⚡ パフォーマンス最適化
+
+### M4 MacBook Pro向け設定
+
+- **メモリ管理**: 各モデルに40GB割り当て
+- **並列処理**: 3モデル同時実行対応
+- **ストリーミング**: TTFT < 500ms
+- **スループット**: TPS > 40 tokens/sec
+
+### トラブルシューティング
+
+Ollamaが応答しない場合：
+```bash
+# Ollamaの再起動
+pkill ollama
+ollama serve
+```
+
+メモリ不足の場合：
+```bash
+# 軽量モデルに切り替え
+ollama pull llama3.2:1b
+ollama pull gemma2:2b
+```
+
+## 📄 ライセンス
+
+MIT License - 詳細は[LICENSE](LICENSE)を参照
+
+## 🤝 謝辞
+
+- [OpenArena](https://github.com/syv-ai/OpenArena) by syv-ai - コアロジックの基盤
+- [Ollama](https://ollama.com) - ローカルLLM実行環境
+- [FastAPI](https://fastapi.tiangolo.com) - 高性能WebSocketサーバー
+- [Next.js](https://nextjs.org) - モダンReactフレームワーク
+
+---
+
+Based on [OpenArena](https://github.com/syv-ai/OpenArena) by syv-ai
