@@ -24,16 +24,63 @@
 
 ## 🚀 クイックスタート
 
+### 1. 事前準備
+
 ```bash
-# 開発環境の起動
+# Ollamaが起動していることを確認
+ollama serve
+
+# モデルがインストールされていることを確認（最低1つ必要）
+ollama list
+
+# 軽量モデルをインストール（まだの場合）
+ollama pull llama3.2:3b
+```
+
+### 2. アプリケーション起動
+
+```bash
+# 初回実行時は実行権限を付与
 chmod +x run_dev.sh
+
+# 開発環境の起動（バックエンドとフロントエンドを同時起動）
 ./run_dev.sh
 ```
 
+### 3. アクセス
+
 アプリケーションが起動すると：
-- Frontend UI: http://localhost:3000
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+- **Frontend UI**: http://localhost:3000 - メインのディベートUI
+- **Backend API**: http://localhost:8000 - APIサーバー
+- **API Docs**: http://localhost:8000/docs - Swagger UI
+
+### 4. 使い方
+
+1. ブラウザで http://localhost:3000 にアクセス
+2. 左側のControl Panelで：
+   - ディベートトピックを入力
+   - 3つのモデルを選択（Agent A、Agent B、Judge）
+   - "Start Debate"ボタンをクリック
+3. 右側のArenaでリアルタイムディベートを観戦
+
+### トラブルシューティング
+
+**WebSocket接続エラーが表示される場合：**
+```bash
+# サービスを再起動
+pkill -f "uvicorn\|next"
+./run_dev.sh
+```
+
+**モデル一覧が表示されない場合：**
+```bash
+# Ollamaが起動しているか確認
+curl http://localhost:11434/api/tags
+
+# Ollamaを再起動
+pkill ollama
+ollama serve
+```
 
 ## 📋 必要要件
 

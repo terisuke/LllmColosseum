@@ -3,17 +3,18 @@
 import { useState, useEffect } from 'react';
 import { Play, Loader2, RefreshCw } from 'lucide-react';
 
+import { useArenaStore } from '../stores/arenaStore';
+
 interface ControlPanelProps {
   onStartDebate: (topic: string, roles: {
     combatant_a: string;
     combatant_b: string;
     judge: string;
   }) => void;
-  isConnected: boolean;
-  isDebating: boolean;
 }
 
-export const ControlPanel = ({ onStartDebate, isConnected, isDebating }: ControlPanelProps) => {
+export const ControlPanel = ({ onStartDebate }: ControlPanelProps) => {
+  const { isConnected, isDebating, setDebateTopic, setSelectedModels } = useArenaStore();
   const [topic, setTopic] = useState('');
   const [combatantA, setCombatantA] = useState('');
   const [combatantB, setCombatantB] = useState('');
@@ -63,6 +64,14 @@ export const ControlPanel = ({ onStartDebate, isConnected, isDebating }: Control
       alert('Please select all models');
       return;
     }
+
+    // Store に設定を保存
+    setDebateTopic(topic);
+    setSelectedModels({
+      combatant_a: combatantA,
+      combatant_b: combatantB,
+      judge: judge,
+    });
 
     onStartDebate(topic, {
       combatant_a: combatantA,
