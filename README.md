@@ -167,12 +167,20 @@ npm run dev
    - Combatant A: 賛成側の論者
    - Combatant B: 反対側の論者
    - Judge: 審判役
+   
+   ※ モデル名にサイズ（120B, 32B等）が表示されます
 
 2. **トピック入力**: ディベートのテーマを入力
+   - 英語例: "AI will replace human jobs"
+   - 日本語例: "きのこの山よりたけのこの里の方が美味しい"
+   
+   ※ 言語は自動検出されます
 
 3. **ディベート開始**: "Start Debate"ボタンをクリック
 
 4. **リアルタイム観戦**: 3カラムレイアウトでトークンストリーミングを観察
+   - 各エージェントの回答が正しいカラムに表示
+   - 完全な回答が表示されるまでストリーミング
 
 ## ⚡ パフォーマンス最適化
 
@@ -208,6 +216,10 @@ ollama pull gemma2:2b
 - 🎨 Modern UI with Next.js 15 & Tailwind CSS
 - 📊 Performance metrics (TPS, TTFT, time tracking)
 - 🤖 Support for multiple Ollama models
+- 🌏 **日本語/英語 自動言語検出対応**
+- 📝 **拡張トークン制限** (Agent: 3000, Judge: 5000)
+- 🏷️ **モデルサイズ表示** (120B, 32B, 27B, etc.)
+- 🔄 **改善されたWebSocket通信**
 
 ## 🤝 Contributing
 

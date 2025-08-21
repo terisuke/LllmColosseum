@@ -108,7 +108,7 @@ Make your response in 2-3 paragraphs."""
                 "stream": True,
                 "options": {
                     "temperature": 0.7,
-                    "num_predict": 2000
+                    "num_predict": 3000
                 }
             }
         ) as response:
@@ -227,7 +227,7 @@ Format your response with clear sections and provide detailed reasoning for your
                 "stream": True,
                 "options": {
                     "temperature": 0.3,
-                    "num_predict": 3000
+                    "num_predict": 5000
                 }
             }
         ) as response:
