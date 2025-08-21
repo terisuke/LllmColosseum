@@ -49,15 +49,37 @@ class DebateAgent:
         return headers
     
     def build_prompt(self, topic: str, opponent_response: Optional[str] = None, is_opening: bool = False) -> str:
-        if is_opening:
-            prompt = f"""You are participating in a debate on the topic: "{topic}"
-            
+        # 日本語を検出（簡易的な方法）
+        is_japanese = any(ord(char) > 0x3000 for char in topic)
+        
+        if is_japanese:
+            if is_opening:
+                prompt = f"""あなたは次のトピックについてディベートに参加しています: "{topic}"
+                
+{self.persona if self.persona else ""}
+
+開始の議論を提供してください。明確で、論理的で、説得力のある議論を展開してください。
+2-3段落で議論を述べてください。"""
+            else:
+                prompt = f"""あなたは次のトピックについてディベートを続けています: "{topic}"
+
+{self.persona if self.persona else ""}
+
+相手は次のように言いました:
+{opponent_response}
+
+反論や応答を提供してください。相手のポイントに直接対処し、あなた自身の視点を提示してください。
+2-3段落で応答してください。"""
+        else:
+            if is_opening:
+                prompt = f"""You are participating in a debate on the topic: "{topic}"
+                
 {self.persona if self.persona else ""}
 
 Please provide your opening argument. Be clear, logical, and persuasive.
 Make your argument in 2-3 paragraphs."""
-        else:
-            prompt = f"""You are continuing a debate on the topic: "{topic}"
+            else:
+                prompt = f"""You are continuing a debate on the topic: "{topic}"
 
 {self.persona if self.persona else ""}
 
@@ -86,7 +108,7 @@ Make your response in 2-3 paragraphs."""
                 "stream": True,
                 "options": {
                     "temperature": 0.7,
-                    "num_predict": 500
+                    "num_predict": 2000
                 }
             }
         ) as response:
@@ -144,12 +166,40 @@ class JudgeAgent:
         metrics.start_time = time.perf_counter()
         first_token = True
         
-        debate_text = f"Topic: {topic}\n\n"
-        for turn in debate_history:
-            agent_name = "Agent A" if turn.agent == AgentRole.COMBATANT_A else "Agent B"
-            debate_text += f"{agent_name}:\n{turn.content}\n\n"
+        # 日本語を検出（簡易的な方法）
+        is_japanese = any(ord(char) > 0x3000 for char in topic)
         
-        evaluation_prompt = f"""You are an impartial judge evaluating a debate between two agents.
+        if is_japanese:
+            debate_text = f"トピック: {topic}\n\n"
+            for turn in debate_history:
+                agent_name = "エージェントA" if turn.agent == AgentRole.COMBATANT_A else "エージェントB"
+                debate_text += f"{agent_name}:\n{turn.content}\n\n"
+            
+            evaluation_prompt = f"""あなたは2つのエージェント間のディベートを評価する公平な審判です。
+
+{debate_text}
+
+以下を含む包括的な評価を提供してください：
+
+1. **議論の要約**: 各エージェントの主要なポイントを簡潔に要約
+2. **強みと弱み**: 各議論の強みと弱みを分析
+3. **論理的一貫性**: 論理的な一貫性と推論を評価
+4. **証拠とサポート**: 使用された証拠と例の質を評価
+5. **説得力**: どの議論がより説得力があったかを判断
+
+最後に、スコアと共に評決を提供してください：
+- エージェントAスコア: [1-10]
+- エージェントBスコア: [1-10]
+- 勝者: [エージェントA/エージェントB/引き分け]
+
+明確なセクションでレスポンスをフォーマットし、スコアの詳細な理由を提供してください。"""
+        else:
+            debate_text = f"Topic: {topic}\n\n"
+            for turn in debate_history:
+                agent_name = "Agent A" if turn.agent == AgentRole.COMBATANT_A else "Agent B"
+                debate_text += f"{agent_name}:\n{turn.content}\n\n"
+            
+            evaluation_prompt = f"""You are an impartial judge evaluating a debate between two agents.
 
 {debate_text}
 
@@ -177,7 +227,7 @@ Format your response with clear sections and provide detailed reasoning for your
                 "stream": True,
                 "options": {
                     "temperature": 0.3,
-                    "num_predict": 1000
+                    "num_predict": 3000
                 }
             }
         ) as response:
@@ -218,22 +268,32 @@ Format your response with clear sections and provide detailed reasoning for your
     def _parse_scores(self, evaluation: str) -> Dict[str, any]:
         scores = {}
         try:
-            if "Agent A Score:" in evaluation:
-                score_a_start = evaluation.index("Agent A Score:") + len("Agent A Score:")
+            # 英語と日本語の両方のパターンをチェック
+            if "Agent A Score:" in evaluation or "エージェントAスコア:" in evaluation:
+                if "Agent A Score:" in evaluation:
+                    score_a_start = evaluation.index("Agent A Score:") + len("Agent A Score:")
+                else:
+                    score_a_start = evaluation.index("エージェントAスコア:") + len("エージェントAスコア:")
                 score_a = int(evaluation[score_a_start:score_a_start+5].strip().split()[0])
                 scores["agent_a_score"] = score_a
             
-            if "Agent B Score:" in evaluation:
-                score_b_start = evaluation.index("Agent B Score:") + len("Agent B Score:")
+            if "Agent B Score:" in evaluation or "エージェントBスコア:" in evaluation:
+                if "Agent B Score:" in evaluation:
+                    score_b_start = evaluation.index("Agent B Score:") + len("Agent B Score:")
+                else:
+                    score_b_start = evaluation.index("エージェントBスコア:") + len("エージェントBスコア:")
                 score_b = int(evaluation[score_b_start:score_b_start+5].strip().split()[0])
                 scores["agent_b_score"] = score_b
             
-            if "Winner:" in evaluation:
-                winner_start = evaluation.index("Winner:") + len("Winner:")
-                winner_text = evaluation[winner_start:winner_start+20].strip().lower()
-                if "agent a" in winner_text:
+            if "Winner:" in evaluation or "勝者:" in evaluation:
+                if "Winner:" in evaluation:
+                    winner_start = evaluation.index("Winner:") + len("Winner:")
+                else:
+                    winner_start = evaluation.index("勝者:") + len("勝者:")
+                winner_text = evaluation[winner_start:winner_start+30].strip().lower()
+                if "agent a" in winner_text or "エージェントa" in winner_text:
                     scores["winner"] = "agent_a"
-                elif "agent b" in winner_text:
+                elif "agent b" in winner_text or "エージェントb" in winner_text:
                     scores["winner"] = "agent_b"
                 else:
                     scores["winner"] = "tie"

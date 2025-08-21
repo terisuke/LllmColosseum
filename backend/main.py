@@ -86,43 +86,60 @@ async def get_available_models():
                     data = await response.json()
                     models = []
                     for model in data.get("models", []):
-                        # モデル名からサイズ情報を抽出
-                        name = model["name"]
-                        size = None
-                        if ":" in name:
-                            base_name, tag = name.split(":", 1)
-                            if "b" in tag.lower():
-                                size = tag
-                        else:
-                            base_name = name
+                        # モデル名とサイズ情報を含めた表示名を作成
+                        model_id = model["name"]
                         
-                        # 人間が読みやすい名前に変換
-                        display_name = base_name.replace("-", " ").title()
+                        # 特定のモデルに対してわかりやすい表示名を作成
+                        if model_id == "gpt-oss:120b":
+                            display_name = "GPT-OSS (120B)"
+                        elif model_id == "qwen3:32B":
+                            display_name = "Qwen3 (32B)"
+                        elif model_id == "gemma3:27b":
+                            display_name = "Gemma3 (27B)"
+                        elif model_id == "gemma3:12b":
+                            display_name = "Gemma3 (12B)"
+                        elif model_id == "gemma3:latest":
+                            display_name = "Gemma3 (Latest)"
+                        elif model_id == "qwen3:latest":
+                            display_name = "Qwen3 (Latest)"
+                        elif model_id == "gpt-oss:latest":
+                            display_name = "GPT-OSS (Latest)"
+                        elif model_id == "llama3:latest":
+                            display_name = "Llama3 (Latest)"
+                        elif "Swallow-MS" in model_id:
+                            display_name = "Swallow-MS (7B)"
+                        else:
+                            # デフォルトの処理
+                            if ":" in model_id:
+                                base_name, tag = model_id.split(":", 1)
+                                display_name = f"{base_name.replace('-', ' ').title()} ({tag})"
+                            else:
+                                display_name = model_id.replace("-", " ").title()
                         
                         models.append(ModelInfo(
                             name=display_name,
-                            model_id=name,
-                            description=f"Model: {name}",
-                            size=size
+                            model_id=model_id,
+                            description=f"Model: {model_id}",
+                            size=None
                         ))
                     
                     # 推奨モデルを追加（存在しない場合の仮想エントリ）
                     recommended_models = [
                         ModelInfo(
                             name="Qwen 3 (32B)",
-                            model_id="qwen3:32b",
+                            model_id="qwen3:32B",
                             description="Creative strategist persona - Recommended",
-                            size="32b"
+                            size="32B"
                         ),
                         ModelInfo(
-                            name="GPT-OSS (20B)",
-                            model_id="gpt-oss:20b",
+                            name="GPT-OSS (120B)",
+                            model_id="gpt-oss:120b",
                             description="Analytical persona - Recommended",
-                            size="20b"
+                            size="120b"
                         ),
                         ModelInfo(
                             name="Gemma 3 (27B)",
-                            model_id="gemma-3:27b",
+                            model_id="gemma3:27b",
                             description="Scholarly persona - Recommended",
                             size="27b"
                         )

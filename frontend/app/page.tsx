@@ -25,16 +25,11 @@ export default function Home() {
       
       // token_stream メッセージの処理
       if (message.type === 'token_stream') {
-        const agentMap: any = {
-          'combatant_a': 'A',
-          'combatant_b': 'B', 
-          'judge': 'judge'
-        };
-        const mappedAgent = agentMap[message.agent] || message.agent;
-        appendAgentOutput(mappedAgent, message.token);
+        // バックエンドから既に "A", "B", "judge" という値が送られてくる
+        appendAgentOutput(message.agent, message.token);
         
         if (message.metrics) {
-          updateAgentMetrics(mappedAgent, {
+          updateAgentMetrics(message.agent, {
             tps: message.metrics.tps || 0,
             ttft: message.metrics.ttft,
             totalTokens: message.metrics.total_tokens || 0
@@ -44,14 +39,9 @@ export default function Home() {
       
       // turn_start メッセージの処理
       else if (message.type === 'turn_start') {
-        const agentMap: any = {
-          'combatant_a': 'A',
-          'combatant_b': 'B',
-          'judge': 'judge'
-        };
-        const mappedAgent = agentMap[message.agent] || message.agent;
-        setCurrentSpeaker(mappedAgent);
-        clearAgentOutput(mappedAgent);
+        // バックエンドから既に "A", "B", "judge" という値が送られてくる
+        setCurrentSpeaker(message.agent);
+        clearAgentOutput(message.agent);
       }
       
       // debate_started メッセージの処理
